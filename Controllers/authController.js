@@ -102,4 +102,35 @@ const verifyWelcomeMail = async (req, res, next) => {
     }
 }
 
+const forgotpassword = async (req, res, next) => {
+    try {
+        const {email} = req.body
+        if(!email){
+            throw new customError("Please provide your email address", 400)
+        }
+        const user = await User.findOne({email : email})
+        if(!user){
+            throw new customError("Account Not Found", 404)
+        }
+        const verificationToken = generateToken()
+        const clientUrl = `${process.env.FRONTEND_URL}/forgot-password/${verificationToken}`
+        const verificationTokenExpiration = Date.now() + 1000 * 60 * 5
+        user.verificationToken = verificationToken
+        user.verificationTokenExpiration = verificationTokenExpiration
+        await user.save()
+        await sendResetMail({
+            firstName : user.firstName,
+            lastName : user.lastName,
+            email,
+            clientUrl
+        })
+        res.status(200).json({
+            success : true,
+            msg : "Forgot Password mail sent successfully"
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 module.exports = {register, login, verifyWelcomeMail}
