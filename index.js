@@ -9,6 +9,7 @@ const cloudinary = require('./Config/cloudinary')
 const startServer = require('./Config/mongoDB')
 const globalErrorHandler = require("./Middlewares/errorHandler")
 const routeNotFound = require("./Utils/routeNotFound")
+const authRoutes = require("./Routes/authRoutes")
 
 app.use(express.json())
 app.use(cors())
@@ -19,5 +20,6 @@ app.get("/", (req, res)=>{
         msg : "Server is live and listening"
     })
 })
+app.use("/api/v1/auth", authRoutes)
 app.use(routeNotFound)
 app.use(globalErrorHandler)

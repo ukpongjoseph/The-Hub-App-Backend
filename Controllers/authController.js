@@ -60,7 +60,7 @@ const login = async (req, res, next) => {
         }
         const token = existingUser.generateJwtToken()
         res.status(200).json({
-            success : false,
+            success : true,
             msg : "Logged In successfully",
             userId : existingUser._id,
             firstName : existingUser.firstName,
@@ -93,6 +93,10 @@ const verifyWelcomeMail = async (req, res, next) => {
         user.verificationToken = undefined
         user.verificationTokenExpiration = undefined
         await user.save()
+        res.status(200).json({
+            success : true,
+            msg : "E-mail verification successful"
+        })
     } catch (error) {
         next(error)
     }
