@@ -76,7 +76,7 @@ authSchema.methods.confirmPassword = async function (userPassword){
     const isCorrect = await bcrypt.compare(userPassword, this.password)
     return isCorrect
 }
-authSchema.methods.generateToken = function (){
+authSchema.methods.generateJwtToken = function (){
     return (jwt.sign(
         {
             userId : this._id,
