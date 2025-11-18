@@ -21,12 +21,14 @@ const authSchema = new schemaConstructor({
         index : true
     },
     phoneNumber : {
-        type : Number,
-        unique : true
+        type : String,
+        unique : true,
+        sparse : true
     },
     googleId : {
         type : String,
-        unique : true
+        unique : true,
+        sparse : true
     },
     isVerified : {
         type : Boolean,
@@ -92,4 +94,4 @@ authSchema.methods.generateJwtToken = function (){
     ))
 }
 
-module.exports = mongoose.model("user", authSchema)
+module.exports = mongoose.model("hubUser", authSchema)

@@ -7,7 +7,7 @@ const welcomeMail = ({firstName, lastName, clientUrl}) => {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Document</title>
             </head>
-            <body style="display: flex; flex-direction: row; justify-content: center; align-items: center; height: 100vh;;">
+            <body style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh;;">
                 <div style="display: flex; gap: 20px; flex-direction: column; width: 300px; height: 60vh; box-shadow: 2px 2px gray; border-radius: 10px; padding: 10px; background-color: beige">
                     <h3 style="color : green; font-weight: bold; font-size: 14px; text-transform: uppercase;">Please Confirm your email address</h3>
                     <p>Dear ${firstName} ${lastName},</p>
@@ -30,7 +30,7 @@ const resetMail = ({firstName, lastName, clientUrl}) => {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Document</title>
             </head>
-            <body style="display: flex; flex-direction: row; justify-content: center; align-items: center; height: 100vh;;">
+            <body style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh;;">
                 <div style="display: flex; gap: 20px; flex-direction: column; width: 300px; height: 60vh; box-shadow: 2px 2px gray; border-radius: 10px; padding: 10px; background-color: beige">
                     <h3 style="color : green; font-weight: bold; font-size: 14px; text-transform: uppercase;">PASSWORD RESET MAIL</h3>
                     <p>Dear ${firstName} ${lastName},</p>

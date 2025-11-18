@@ -4,10 +4,11 @@ const Post = require("../Models/postModel")
 const customError = require("../Utils/customeError")
 const generateToken = require("../Utils/generateToken")
 const {sendResetMail, sendWelcomeMail} = require("../Email/sendEmail")
+require("dotenv").config()
 
 const register = async (req, res, next) => {
     try {
-        const {firstName, lastName, email, password} = req.body
+        const {firstName, lastName, email, password, role, phoneNumber} = req.body
         if(!firstName || !lastName || !email || !password){
             throw new customError("Please provide the necessary details", 400)
         }
@@ -24,7 +25,9 @@ const register = async (req, res, next) => {
             email : email,
             password : password,
             verificationToken : verificationToken,
-            verificationTokenExpiration : verificationTokenExpiration
+            verificationTokenExpiration : verificationTokenExpiration,
+            role : req.body.role? req.body.role : "user",
+            phoneNumber : req.body.phoneNumber? phoneNumber : undefined
         })
         await sendWelcomeMail({
             firstName : user.firstName,
@@ -38,6 +41,7 @@ const register = async (req, res, next) => {
             user
         })
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }
