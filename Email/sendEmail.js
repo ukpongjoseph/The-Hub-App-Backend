@@ -35,7 +35,7 @@ const sendWelcomeMail = async ({firstName, lastName, email, clientUrl})=>{
 }
 
 const sendResetMail = async ({firstName, lastName, email, clientUrl})=>{
-    const subject = "WELCOME TO THE HUB APP"
+    const subject = "RESET PASSWORD"
     const html = resetMail({firstName, lastName, clientUrl})
     await mailSender({to : email, subject, html})
 }
