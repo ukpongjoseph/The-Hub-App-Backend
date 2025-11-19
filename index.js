@@ -24,14 +24,8 @@ app.get("/", (req, res)=>{
         msg : "Server is live and listening"
     })
 })
-try {
-    startServer()
-    app.listen(PORT, ()=>{
-        console.log(`DataBase is connected and server is listening at PORT : ${PORT}`)
-    })
-} catch (error) {
-    console.error(error.message)
-}
+
+startServer()
 app.use("/api/v1/auth", authRoutes)
 app.use(routeNotFound)
 app.use(globalErrorHandler)

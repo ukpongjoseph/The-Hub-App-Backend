@@ -10,6 +10,9 @@ require("dotenv").config()
 const startServer = async () => {
     try {
         const connect = await mongoose.connect(process.env.dbURL, {dbName :"Hub_App"})
+        app.listen(PORT, ()=>{
+        console.log(`DataBase is connected and server is listening at PORT : ${PORT}`)
+        })
         console.log(connect.connections[0].name)
         console.log(connect.connections[0].port)
     } catch (error) {
@@ -18,6 +21,5 @@ const startServer = async () => {
     }
 }
 
-// startServer()
 
 module.exports = startServer
