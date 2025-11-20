@@ -15,6 +15,7 @@ const startServer = require("./Config/mongoDB")
 
 
 
+
 app.use(express.json())
 app.use(cors())
 app.use(expressFileUpload({useTempFiles : true}))
@@ -25,7 +26,12 @@ app.get("/", (req, res)=>{
     })
 })
 
-startServer()
+startServer().then(()=>{
+    app.listen(PORT, ()=>{
+        console.log(`App is listening on port : ${PORT}`)
+    })
+})
+
 app.use("/api/v1/auth", authRoutes)
 app.use(routeNotFound)
 app.use(globalErrorHandler)

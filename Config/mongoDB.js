@@ -10,14 +10,13 @@ require("dotenv").config()
 const startServer = async () => {
     try {
         const connect = await mongoose.connect(process.env.dbURL, {dbName :"Hub_App"})
-        app.listen(PORT, ()=>{
-        console.log(`DataBase is connected and server is listening at PORT : ${PORT}`)
-        })
-        console.log(connect.connections[0].name)
+        console.log(`Database is connected, dbName : ${connect.connections[0].name}`)
         console.log(connect.connections[0].port)
+        return true
     } catch (error) {
         console.log("Unable to connect to the server, try again later")
         console.log(error.message)
+        process.exit(1)
     }
 }
 

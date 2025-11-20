@@ -14,7 +14,7 @@ const register = async (req, res, next) => {
         }
         const existingUser = await User.findOne({email : email})
         if (existingUser){
-            throw new customError("Account already exist, please login to continue")
+            throw new customError("Account already exist, please login to continue", 400)
         }
         const verificationToken = generateToken()
         const verificationTokenExpiration = Date.now() + 1000 *  60 * 5
