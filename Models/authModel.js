@@ -69,7 +69,7 @@ const authSchema = new schemaConstructor({
 )
 
 authSchema.pre("save", async function(next){
-    if(this.isModified("password"))return next()
+    if(!this.isModified("password"))return next()
         const Salt = await bcrypt.genSalt()
         this.password = await bcrypt.hash(this.password, Salt)
         next()
