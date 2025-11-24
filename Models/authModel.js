@@ -23,7 +23,8 @@ const authSchema = new schemaConstructor({
     phoneNumber : {
         type : String,
         unique : true,
-        sparse : true
+        sparse : true,
+        default : null
     },
     googleId : {
         type : String,
