@@ -346,7 +346,23 @@ const getUsersAllPost = async (req, res, next) => {
 
 const getAllPostsLikedByUser = async (req, res, next) => {
     try {
-        
+        const {userId} = req.user
+        const user = await User.findById(userId)
+        if(!user){
+            throw new customError("User Not Found", 404)
+        }
+        const allLikedPosts = user.likedPosts
+        if(allLikedPosts.length < 1){
+            res.status(200).json({
+                success : true,
+                msg : "You do not have nay liked post"
+            })
+        }
+        res.status(200).json({
+            success : true,
+            msg : "All liked post fetched successfully",
+            allLikedPosts
+        })
     } catch (error) {
         next(error)
     }
@@ -354,7 +370,20 @@ const getAllPostsLikedByUser = async (req, res, next) => {
 
 const getAllPostsCommentedOnByUser = async (req, res, next) => {
     try {
-        
+        // const {postId, commentId} = req.params
+        const {userId} = req.user
+        const user = await User.findById(userId)
+        if(!user){
+            throw new customError("User Not Found", 404)
+        }
+        const allPostsCommentedOn = user.getAllPostsCommentedOnByUser
+        if(allPostsCommentedOn.length < 1){
+            res.status(200).json({
+                success : true,
+                msg : "All Post commented on by the user fetched successfully",
+                allPostsCommentedOn
+            })
+        }
     } catch (error) {
         next(error)
     }
@@ -362,7 +391,17 @@ const getAllPostsCommentedOnByUser = async (req, res, next) => {
 
 const getAPostCreatedByUser =async (req, res, next) => {
     try {
-        
+        const {userId} = req.user
+        const {postId} = req.params
+        const post = await Post.findOne({author : userId, _id : postId})
+        if(!post){
+            throw new customError("Post Not Found", 404)
+        }
+        res.status(200).json({
+            success : true,
+            msg : "Post Fetched successfully",
+            post
+        })
     } catch (error) {
         next(error)
     }

@@ -25,7 +25,23 @@ const commentSchema = new postSchemaConstructor({
         type : String,
         required : [true, "Cannot make an empty comment"]
     },
-    replies : [commentReplies]
+    replies : [commentReplies],
+    likes : [
+        {
+            user : {
+                type : mongoose.Schema.Types.ObjectId,
+                ref : "user"
+            }
+        }
+    ],
+    dislikes : [
+        {
+            user : {
+                type : mongoose.Schema.Types.ObjectId,
+                ref : "user"
+            }
+        }
+    ]
 },
     {timestamps : true}
 )

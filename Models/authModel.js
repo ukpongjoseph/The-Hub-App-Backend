@@ -64,7 +64,19 @@ const authSchema = new schemaConstructor({
     avatar : {
         type : String,
         default : "https://thumbs.dreamstime.com/b/user-profile-d-icon-avatar-person-button-picture-portrait-symbol-vector-neutral-gender-silhouette-circle-photo-blank-272643248.jpg?w=768"
-    }
+    },
+    likedPosts : [
+        {
+            type : mongoose.Schema.Types.ObjectId,
+            ref : "post"
+        }
+    ],
+    postsCommentedOnByUser : [
+        {
+            type : mongoose.Schema.Types.ObjectId,
+            ref : "post"
+        }
+    ]
 },
     {timestamps : true}
 )
