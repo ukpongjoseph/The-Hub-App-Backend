@@ -65,9 +65,7 @@ const login = async (req, res, next) => {
             throw new customError("Account is not verified", 403)
         }
         const token = existingUser.generateJwtToken()
-        res.status(200).json({
-            success : true,
-            msg : "Logged In successfully",
+        const body = {
             userId : existingUser._id,
             firstName : existingUser.firstName,
             lastName : existingUser.lastName,
@@ -77,6 +75,11 @@ const login = async (req, res, next) => {
             bio : existingUser.bio,
             profilePic : existingUser.avatar,
             token
+        }
+        res.status(200).json({
+            success : true,
+            msg : "Logged In successfully",
+            body
         })
     } catch (error) {
         next(error)
