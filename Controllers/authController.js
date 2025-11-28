@@ -5,6 +5,8 @@ const customError = require("../Utils/customeError")
 const generateToken = require("../Utils/generateToken")
 const {sendResetMail, sendWelcomeMail} = require("../Email/sendEmail")
 require("dotenv").config()
+const cloudinary = require("cloudinary").v2
+const fs = require("fs")
 
 const register = async (req, res, next) => {
     try {
@@ -73,7 +75,8 @@ const login = async (req, res, next) => {
             role : existingUser.role,
             phoneNumber : existingUser.phoneNumber,
             bio : existingUser.bio,
-            profilePic : existingUser.avatar
+            profilePic : existingUser.avatar,
+            token
         })
     } catch (error) {
         next(error)
@@ -106,7 +109,7 @@ const verifyWelcomeMail = async (req, res, next) => {
     }
 }
 
-const forgotpassword = async (req, res, next) => {
+const forgotPassword = async (req, res, next) => {
     try {
         const {email} = req.body
         if(!email){
@@ -137,4 +140,229 @@ const forgotpassword = async (req, res, next) => {
     }
 }
 
-module.exports = {register, login, verifyWelcomeMail}
+const updateProfile = async (req, res, next) => {
+    try {
+        const {firstName, lastName, email, phoneNumber, bio} = req.body
+        const {avatar} = req.files
+        const {userId} = req.user
+        const user = await User.findById(userId)
+        if(!user){
+            throw new customError("User not found", 404)
+        }
+        if(firstName){
+            user.firstName = firstName
+        }
+        if(lastName){
+            user.lastName = lastName
+        }
+        // This aspect of email update will require an OTP but for now, it would run without OTP until OTP integration is done on the project
+        if(email){
+            user.email = email
+        }
+        // This aspect of phone Number update will require an OTP but for now, it would run without OTP until OTP integration is done on the project
+        if(phoneNumber){
+            user.phoneNumber = phoneNumber
+        }
+        if(bio){
+            user.bio = bio
+        }
+        if(avatar){
+            const ImageObject = cloudinary.uploader.upload(
+                req.files.avatar.tempFilePath,
+                {
+                    use_filename : true,
+                    folder : "THE-HUB-APP-GALLERY",
+                    resource_type : "image"
+                }
+            )
+            const ImageUrl = (await ImageObject).secure_url
+            fs.unlink(req.files.avatar.tempFilePath, (err) => {
+                if(err){
+                    throw new customError(`Error Uploading media, try again later : ${err.message}`, 503)
+                }
+            })
+            user.avatar = ImageUrl
+
+        }
+        user.save()
+        res.status(200).json({
+            success : true,
+            msg : "User profile Updated successfully",
+            userId : user._id,
+            firstName : user.firstName,
+            lastName : user.lastName,
+            email : user.email,
+            role : user.role,
+            phoneNumber : user.phoneNumber,
+            bio : user.bio,
+            profilePic : user.avatar,
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const resetPasswordMail = async (req, res, next) => {
+    try {
+        const {resetToken} = req.params
+        const {password} = req.body
+        const user = await User.findOne({verificationToken : resetToken})
+        if(!user){
+            throw new customError("User Not Found", 404)
+        }
+        if(user.verificationTokenExpiration < Date.now()){
+            throw new customError("Your reset password Token is expired", 401)
+        }
+        if(!password){
+            throw new customError("Please provide your password", 400)
+        }
+        user.password = password
+        user.verificationToken = undefined
+        user.verificationTokenExpiration = undefined
+        user.save()
+        return res.status(200).json({
+            success : true,
+            msg : "Password reset Successful, go back to login"
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const deleteAUser = async (req, res, next) => {
+    try {
+        const {userId} = req.params
+        if(!userId){
+            throw new customError("Provide User Id", 400)
+        }
+        const userToBeDeleted = await User.findById(userId)
+        if(!userToBeDeleted){
+            throw new customError("User Not Found", 404)
+        }
+        await User.findByIdAndDelete(userId)
+        res.status(200).json({
+            success : true,
+            msg : "User deleted successfully"
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const getAUser = async (req, res , next) => {
+    try {
+        const {userId} = req.params
+        const user = await User.findById(userId)
+        if(!user){
+            throw new customError("User Not Found", 404)
+        }
+        res.status(200).json({
+            success : true,
+            msg : "User Found",
+            user
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const getAllUsers = async (req, res, next) => {
+    try {
+
+        const totalNumberOfAllUsers = await User.countDocuments()
+        const limit = parseInt(req.query.limit) || 10
+        const totalNumberOfpages = Math.ceil(totalNumberOfAllUsers/limit)
+        let page = parseInt(req.query.page) || 1
+        if(page > totalNumberOfpages){
+            page = ((page - 1) % totalNumberOfpages) + 1
+        }else if(page == 0){
+            page = totalNumberOfpages
+        }
+        else if(page < 1){
+            page = (page % totalNumberOfpages) + totalNumberOfpages + 1
+        }
+        const pagesToSkip = page - 1 
+
+        // The idea for the skip also called as offset is that if i have 10 document per page and i want document number 45. i know that what is want is beyond 10, 20, 10, 40...all this makes it 4 skips showing that the document is on page 5. Note that page is 5, and we skipped 4 pages which are the pagesToSkip...so we are ignoring the first 40 documents making the search faster 
+        const skip = pagesToSkip * limit
+
+        const allUsers = await User
+        .find()
+        .sort("-createdAt")
+        .skip(skip)
+        .limit(limit)
+        .exec()
+        res.status(200).json({
+            success : true,
+            msg : "Users fetched successfully",
+            allUsers
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const getUsersAllPost = async (req, res, next) => {
+    try {
+        const {userId} = req.user
+        let page = parseInt(req.query.page) || 1
+        const limit = parseInt(req.query.limit) || 10
+        const totalNumberOfUsersPosts = await Post.countDocuments({author : userId})
+        const totalNumberOfpages = Math.ceil(totalNumberOfUsersPosts/limit)
+        if(totalNumberOfpages == 0){
+            res.status(200).json({
+                success : true,
+                msg : "No Post Found"
+            })
+        }
+        if(page > totalNumberOfpages){
+            page = ((page - 1) % totalNumberOfpages) + 1
+        }else if (page == 0){
+            page = totalNumberOfpages
+        }
+        else if(page < 1){
+            page = (page % totalNumberOfpages) + totalNumberOfpages + 1
+        }
+        const pagesToSkip = page - 1
+        const skip = pagesToSkip * limit
+        const allPostByUser = await Post
+        .find({author : userId})
+        .sort("-createdAt")
+        .skip(skip)
+        .limit(limit)
+        .exec()
+        res.status(200).json({
+            success : true,
+            msg : "All Post fetched successfully",
+            allPostByUser
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const getAllPostsLikedByUser = async (req, res, next) => {
+    try {
+        
+    } catch (error) {
+        next(error)
+    }
+}
+
+const getAllPostsCommentedOnByUser = async (req, res, next) => {
+    try {
+        
+    } catch (error) {
+        next(error)
+    }
+}
+
+const getAPostCreatedByUser =async (req, res, next) => {
+    try {
+        
+    } catch (error) {
+        next(error)
+    }
+}
+
+module.exports = {register, login, verifyWelcomeMail, forgotPassword, updateProfile, resetPasswordMail, deleteAUser, getAllUsers, getAUser, getAllPostsCommentedOnByUser, getAPostCreatedByUser, getAllPostsLikedByUser, getUsersAllPost}
